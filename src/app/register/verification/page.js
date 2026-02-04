@@ -3,12 +3,13 @@
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useRegisterMutation } from '../../../store/apiSlice';
 
 export default function Verification() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const router = useRouter();
   const [formData, setFormData] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [registerUser, { isLoading }] = useRegisterMutation();
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [photoUploadController, setPhotoUploadController] = useState(null);
@@ -109,12 +110,14 @@ export default function Verification() {
   };
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
     try {
-      const finalData = { ...formData, ...data };
+      const finalData = { 
+        ...formData, 
+        ...data,
+        role: "TECHNICIAN"
+      };
       
-      // API call for registration
-      console.log('Final registration data:', finalData);
+      await registerUser(finalData).unwrap();
       
       // Clear localStorage
       localStorage.removeItem('registrationData');
@@ -123,8 +126,7 @@ export default function Verification() {
       router.push('/verification-pending');
     } catch (error) {
       console.error('Registration failed:', error);
-    } finally {
-      setIsLoading(false);
+      alert(error?.data?.message || 'Registration failed. Please try again.');
     }
   };
 

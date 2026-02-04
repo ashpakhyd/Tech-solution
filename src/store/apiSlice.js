@@ -28,6 +28,13 @@ export const apiSlice = createApi({
         body: credentials,
       }),
     }),
+    register: builder.mutation({
+      query: (userData) => ({
+        url: '/auth/register',
+        method: 'POST',
+        body: userData,
+      }),
+    }),
     getProfile: builder.query({
       query: () => '/auth/me',
       providesTags: ['User'],
@@ -114,6 +121,7 @@ export const apiSlice = createApi({
 
 export const {
   useLoginMutation,
+  useRegisterMutation,
   useGetProfileQuery,
   useGetMyTicketsQuery,
   useGetTicketQuery,
