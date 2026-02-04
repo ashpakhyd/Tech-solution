@@ -46,12 +46,11 @@ export const apiSlice = createApi({
       pollingInterval: 5000, // Refresh every 5 seconds
     }),
     updateTicketStatus: builder.mutation({
-      query: ({ id, status, otp }) => {
+      query: ({ id, status, customerOtp }) => {
         const body = { status };
-        if (otp && otp.length === 6) {
-          body.customerOtp = otp;
+        if (customerOtp && customerOtp.length === 6) {
+          body.customerOtp = customerOtp;
         }
-        console.log('API body:', body); // Debug log
         return {
           url: `/tickets/${id}/status`,
           method: 'PATCH',
