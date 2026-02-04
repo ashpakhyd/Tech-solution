@@ -20,13 +20,27 @@ export default function TicketDetail() {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState(null);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const otpRefs = useRef([]);
 
   const message = watch('message');
   const isInternal = watch('isInternal');
 
+  const showToast = (message, type = 'error') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: '' }), 3000);
+  };
+
+  const clearOtpModal = () => {
+    setShowOtpModal(false);
+    setPendingStatus(null);
+    setOtp(['', '', '', '', '', '']);
+  };
+
   const handleStatusUpdate = async (status, otpCode = null) => {
     try {
+      setIsUpdatingStatus(true);
       const payload = { id, status };
       if (otpCode && otpCode.length === 6) {
         if (status === 'COMPLETED') {
@@ -36,12 +50,14 @@ export default function TicketDetail() {
         }
       }
       await updateStatus(payload).unwrap();
-      setShowOtpModal(false);
-      setPendingStatus(null);
-      setOtp(['', '', '', '', '', '']);
+      clearOtpModal();
+      showToast('Status updated successfully!', 'success');
     } catch (error) {
       console.error('Status update failed:', error);
-      console.error('Error details:', error.data); // More detailed error
+      const errorMessage = error?.data?.message || 'Failed to update status. Please try again.';
+      showToast(errorMessage, 'error');
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -207,17 +223,33 @@ export default function TicketDetail() {
             {ticket?.status === 'ASSIGNED' && (
               <button
                 onClick={handleStartWork}
-                className="btn btn-primary flex-1"
+                disabled={isUpdatingStatus}
+                className="btn btn-primary flex-1 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Start Work
+                {isUpdatingStatus && pendingStatus === 'IN_PROGRESS' ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Starting...
+                  </>
+                ) : (
+                  'Start Work'
+                )}
               </button>
             )}
             {ticket?.status === 'IN_PROGRESS' && (
               <button
                 onClick={handleMarkComplete}
-                className="btn btn-primary flex-1"
+                disabled={isUpdatingStatus}
+                className="btn btn-primary flex-1 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Mark Complete
+                {isUpdatingStatus && pendingStatus === 'COMPLETED' ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Completing...
+                  </>
+                ) : (
+                  'Mark Complete'
+                )}
               </button>
             )}
             {ticket?.status === 'COMPLETED' && (
@@ -324,19 +356,45 @@ export default function TicketDetail() {
             
             <div className="flex gap-3">
               <button
-                onClick={() => setShowOtpModal(false)}
+                onClick={clearOtpModal}
                 className="flex-1 py-2 px-4 border border-gray-300 rounded-lg font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleOtpSubmit}
-                disabled={otp.join('').length !== 6}
-                className="flex-1 btn btn-primary disabled:opacity-50"
+                disabled={otp.join('').length !== 6 || isUpdatingStatus}
+                className="flex-1 btn btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Verify
+                {isUpdatingStatus ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify'
+                )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`fixed top-4 left-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToast({ show: false, message: '', type: '' })}
+              className="ml-2 text-white hover:text-gray-200"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+              </svg>
+            </button>
           </div>
         </div>
       )}
