@@ -50,6 +50,46 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Recent Ratings */}
+        {ratings?.length > 0 && (
+          <div className="card p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Recent Ratings</h3>
+              <button className="text-red-600 text-sm font-medium">
+                View All
+              </button>
+            </div>
+            <div className="space-y-3">
+              {ratings.slice(0, 3).map((rating) => (
+                <div key={rating._id} className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium text-sm">{rating.customer?.name}</span>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span 
+                          key={i} 
+                          className={`text-sm ${i < rating.rating ? 'text-yellow-500' : 'text-gray-300'}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="ml-1 text-sm font-semibold">{rating.rating}</span>
+                    </div>
+                  </div>
+                  {rating.feedback && (
+                    <p className="text-sm text-gray-600 mb-2">
+                      "{rating.feedback}"
+                    </p>
+                  )}
+                  <span className="text-xs text-gray-500">
+                    {new Date(rating.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Menu Items */}
         <div className="space-y-2">
           <button className="w-full card p-4 flex items-center justify-between">

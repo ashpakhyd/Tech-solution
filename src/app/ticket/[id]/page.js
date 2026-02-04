@@ -175,17 +175,21 @@ export default function TicketDetail() {
               <span className="text-secondary">Name</span>
               <span className="font-medium">{ticket?.customer?.name}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-secondary">Phone</span>
-              <a href={`tel:${ticket?.customer?.phone}`} className="font-medium text-red-600">
-                {ticket?.customer?.phone}
-              </a>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-secondary">Address</span>
-              <span className="font-medium text-right flex-1 ml-4">{ticket?.address}</span>
-            </div>
-            {ticket?.houseDetails && (
+            {ticket?.status !== 'COMPLETED' && (
+              <div className="flex justify-between">
+                <span className="text-secondary">Phone</span>
+                <a href={`tel:${ticket?.customer?.phone}`} className="font-medium text-red-600">
+                  {ticket?.customer?.phone}
+                </a>
+              </div>
+            )}
+            {ticket?.status !== 'COMPLETED' && (
+              <div className="flex justify-between">
+                <span className="text-secondary">Address</span>
+                <span className="font-medium text-right flex-1 ml-4">{ticket?.address}</span>
+              </div>
+            )}
+            {ticket?.houseDetails && ticket?.status !== 'COMPLETED' && (
               <div className="flex justify-between">
                 <span className="text-secondary">House Details</span>
                 <span className="font-medium text-right flex-1 ml-4">{ticket?.houseDetails}</span>
@@ -195,7 +199,7 @@ export default function TicketDetail() {
         </div>
 
         {/* Location Map */}
-        {ticket?.latitude && ticket?.longitude && (
+        {ticket?.latitude && ticket?.longitude && ticket?.status !== 'COMPLETED' && (
           <div className="card p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
