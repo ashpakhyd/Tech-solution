@@ -38,6 +38,7 @@ export default function TicketDetail() {
       setOtp(['', '', '', '', '', '']);
     } catch (error) {
       console.error('Status update failed:', error);
+      console.error('Error details:', error.data); // More detailed error
     }
   };
 
