@@ -119,8 +119,8 @@ export default function Verification() {
       // Clear localStorage
       localStorage.removeItem('registrationData');
       
-      // Redirect to OTP
-      router.push('/otp');
+      // Redirect to verification success page
+      router.push('/verification-pending');
     } catch (error) {
       console.error('Registration failed:', error);
     } finally {
