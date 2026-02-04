@@ -1,16 +1,25 @@
 'use client';
 
 import { useGetNotificationsQuery, useMarkNotificationReadMutation } from '../../store/apiSlice';
+import { useState } from 'react';
 
 export default function Alerts() {
   const { data: notifications, isLoading } = useGetNotificationsQuery();
   const [markAsRead] = useMarkNotificationReadMutation();
+  const [loadingIds, setLoadingIds] = useState(new Set());
 
   const handleMarkRead = async (id) => {
     try {
+      setLoadingIds(prev => new Set(prev).add(id));
       await markAsRead(id).unwrap();
     } catch (error) {
       console.error('Mark read failed:', error);
+    } finally {
+      setLoadingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
   };
 
@@ -38,9 +47,17 @@ export default function Alerts() {
                 {!notification.isRead && (
                   <button
                     onClick={() => handleMarkRead(notification._id)}
-                    className="text-xs text-primary px-2 py-1 rounded border border-primary"
+                    disabled={loadingIds.has(notification._id)}
+                    className="text-xs text-primary px-2 py-1 rounded border border-primary disabled:opacity-50 flex items-center gap-1"
                   >
-                    Mark Read
+                    {loadingIds.has(notification._id) ? (
+                      <>
+                        <div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin"></div>
+                        Loading...
+                      </>
+                    ) : (
+                      'Mark Read'
+                    )}
                   </button>
                 )}
               </div>
@@ -48,7 +65,7 @@ export default function Alerts() {
                 {notification.message}
               </p>
               <span className="text-xs text-secondary">
-                {new Date(notification.createdAt).toLocaleDateString()}
+                {new Date(notification.createdAt).toLocaleDateString()} {new Date(notification.createdAt).toLocaleTimeString()}
               </span>
             </div>
           )) || (

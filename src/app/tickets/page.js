@@ -4,6 +4,19 @@ import { useGetMyTicketsQuery } from '../../store/apiSlice';
 import { useSelector } from 'react-redux';
 import Link from 'next/link';
 import { useState } from 'react';
+import { 
+  MdAir, 
+  MdLocalLaundryService, 
+  MdKitchen, 
+  MdTv, 
+  MdMicrowave,
+  MdOutlineWaterDrop,
+  MdElectricalServices,
+  MdBuild,
+  MdLightbulb,
+  MdElectricBolt,
+  MdOutlineKitchen
+} from 'react-icons/md';
 
 export default function Tickets() {
   const { token } = useSelector((state) => state.auth);
@@ -14,6 +27,47 @@ export default function Tickets() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+
+  const getApplianceIcon = (appliance) => {
+    const iconClass = "w-6 h-6 text-red-600";
+    const applianceLower = appliance?.toLowerCase() || '';
+    
+    // Appliances Repair
+    if (applianceLower.includes('washing machine')) {
+      return <MdLocalLaundryService className={iconClass} />;
+    }
+    if (applianceLower.includes('refrigerator')) {
+      return <MdKitchen className={iconClass} />;
+    }
+    if (applianceLower.includes('microwave')) {
+      return <MdMicrowave className={iconClass} />;
+    }
+    if (applianceLower.includes('dishwasher')) {
+      return <MdOutlineKitchen className={iconClass} />;
+    }
+    if (applianceLower.includes('air conditioner')) {
+      return <MdAir className={iconClass} />;
+    }
+    if (applianceLower.includes('television')) {
+      return <MdTv className={iconClass} />;
+    }
+    
+    // Electrician
+    if (applianceLower.includes('wiring') || applianceLower.includes('installation')) {
+      return <MdElectricalServices className={iconClass} />;
+    }
+    if (applianceLower.includes('electrical repair')) {
+      return <MdElectricBolt className={iconClass} />;
+    }
+    if (applianceLower.includes('lighting')) {
+      return <MdLightbulb className={iconClass} />;
+    }
+    if (applianceLower.includes('fan')) {
+      return <MdElectricalServices className={iconClass} />;
+    }
+    
+    return <MdBuild className={iconClass} />;
+  };
 
   // Filter tickets based on search and filters
   const filteredTickets = tickets?.filter(ticket => {
@@ -147,9 +201,7 @@ export default function Tickets() {
               <div className="card p-4 hover:shadow-lg transition-shadow">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
+                    {getApplianceIcon(ticket.appliance)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
