@@ -29,7 +29,11 @@ export default function TicketDetail() {
     try {
       const payload = { id, status };
       if (otpCode && otpCode.length === 6) {
-        payload.customerOtp = otpCode;
+        if (status === 'COMPLETED') {
+          payload.finalOtp = otpCode;
+        } else {
+          payload.customerOtp = otpCode;
+        }
       }
       await updateStatus(payload).unwrap();
       setShowOtpModal(false);
