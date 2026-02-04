@@ -28,7 +28,10 @@ export default function TicketDetail() {
   const handleStatusUpdate = async (status, otpCode = null) => {
     try {
       const payload = { id, status };
-      if (otpCode) payload.otp = otpCode;
+      if (otpCode && otpCode.length === 6) {
+        payload.otp = otpCode;
+      }
+      console.log('Sending payload:', payload); // Debug log
       await updateStatus(payload).unwrap();
       setShowOtpModal(false);
       setPendingStatus(null);
@@ -59,7 +62,8 @@ export default function TicketDetail() {
   };
 
   const handleOtpSubmit = () => {
-    const otpCode = otp.join('');
+    const otpCode = otp.join('').trim();
+    console.log('OTP Code:', otpCode, 'Length:', otpCode.length); // Debug log
     if (otpCode.length === 6 && pendingStatus) {
       handleStatusUpdate(pendingStatus, otpCode);
     }

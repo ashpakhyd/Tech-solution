@@ -3,14 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { logout } from '../store/authSlice';
 
 export default function MobileNav() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
+  const [isClient, setIsClient] = useState(false);
 
-  if (!token || pathname === '/login' || pathname === '/register' || pathname === '/otp') return null;
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient || !token || pathname === '/login' || pathname === '/register' || pathname === '/otp') return null;
 
   const handleLogout = () => {
     dispatch(logout());
