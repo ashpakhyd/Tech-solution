@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { useGetTicketQuery, useUpdateTicketStatusMutation, useAddCommentMutation, useGetCommentsQuery } from '../../../store/apiSlice';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function TicketDetail() {
   const { id } = useParams();
@@ -17,15 +17,51 @@ export default function TicketDetail() {
   const [updateStatus] = useUpdateTicketStatusMutation();
   const [addComment] = useAddCommentMutation();
   const [showComments, setShowComments] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const otpRefs = useRef([]);
 
   const message = watch('message');
   const isInternal = watch('isInternal');
 
-  const handleStatusUpdate = async (status) => {
+  const handleStatusUpdate = async (status, otpCode = null) => {
     try {
-      await updateStatus({ id, status }).unwrap();
+      const payload = { id, status };
+      if (otpCode) payload.otp = otpCode;
+      await updateStatus(payload).unwrap();
+      setShowOtpModal(false);
+      setPendingStatus(null);
+      setOtp(['', '', '', '', '', '']);
     } catch (error) {
       console.error('Status update failed:', error);
+    }
+  };
+
+  const handleStartWork = () => {
+    setPendingStatus('IN_PROGRESS');
+    setShowOtpModal(true);
+  };
+
+  const handleMarkComplete = () => {
+    setPendingStatus('COMPLETED');
+    setShowOtpModal(true);
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpSubmit = () => {
+    const otpCode = otp.join('');
+    if (otpCode.length === 6 && pendingStatus) {
+      handleStatusUpdate(pendingStatus, otpCode);
     }
   };
 
@@ -163,7 +199,7 @@ export default function TicketDetail() {
           <div className="flex gap-3">
             {ticket?.status === 'ASSIGNED' && (
               <button
-                onClick={() => handleStatusUpdate('IN_PROGRESS')}
+                onClick={handleStartWork}
                 className="btn btn-primary flex-1"
               >
                 Start Work
@@ -171,7 +207,7 @@ export default function TicketDetail() {
             )}
             {ticket?.status === 'IN_PROGRESS' && (
               <button
-                onClick={() => handleStatusUpdate('COMPLETED')}
+                onClick={handleMarkComplete}
                 className="btn btn-primary flex-1"
               >
                 Mark Complete
@@ -254,6 +290,49 @@ export default function TicketDetail() {
           )}
         </div>
       </div>
+
+      {/* OTP Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-6">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-4 text-center">Enter OTP</h3>
+            <p className="text-sm text-secondary text-center mb-6">
+              Enter 6-digit OTP to {pendingStatus === 'IN_PROGRESS' ? 'start work' : 'mark complete'}
+            </p>
+            
+            <div className="flex justify-center gap-2 mb-6">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (otpRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  className="w-10 h-10 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-red-600 focus:outline-none"
+                />
+              ))}
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowOtpModal(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleOtpSubmit}
+                disabled={otp.join('').length !== 6}
+                className="flex-1 btn btn-primary disabled:opacity-50"
+              >
+                Verify
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
