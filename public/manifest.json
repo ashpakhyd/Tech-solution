@@ -1,7 +1,7 @@
 {
-  "name": "Tech App",
-  "short_name": "Tech App",
-  "description": "Technician Mobile App for Store Management",
+  "name": "SD Tech",
+  "short_name": "SD Tech",
+  "description": "Technician App for ticket Management",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
