@@ -18,7 +18,8 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await login(data).unwrap();
+      const payload = { ...data, appType: "technician" };
+      const result = await login(payload).unwrap();
       dispatch(setCredentials({ token: result.token, user: null }));
       router.push('/');
     } catch (err) {
