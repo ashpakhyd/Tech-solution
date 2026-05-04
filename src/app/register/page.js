@@ -2,13 +2,21 @@
 
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Register() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
   const router = useRouter();
   const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('registrationData');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      reset(parsed);
+    }
+  }, [reset]);
 
   const password = watch('password');
   const confirmPassword = watch('confirmPassword');

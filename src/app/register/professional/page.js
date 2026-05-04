@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function ProfessionalDetails() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
   const router = useRouter();
   const [formData, setFormData] = useState({});
 
@@ -17,8 +17,10 @@ export default function ProfessionalDetails() {
       router.push('/register');
       return;
     }
-    setFormData(JSON.parse(savedData));
-  }, [router]);
+    const parsed = JSON.parse(savedData);
+    setFormData(parsed);
+    reset(parsed);
+  }, [router, reset]);
 
   const onSubmit = async (data) => {
     const updatedData = { ...formData, ...data };
